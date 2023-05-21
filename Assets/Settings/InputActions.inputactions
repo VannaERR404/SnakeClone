@@ -1,0 +1,67 @@
+{
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "Default",
+            "id": "f4067c35-b438-45aa-a0dd-9bed893c8ea1",
+            "actions": [
+                {
+                    "name": "Movement Direction",
+                    "type": "Button",
+                    "id": "eb2d10fc-facd-4316-bcfa-745acc6d282d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "06a5043a-4cba-42e0-8d8c-fd2d22979692",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement Direction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6a890ea0-5bc1-4106-998d-376210f793ff",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement Direction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "437e0d53-0f61-47b1-8cda-183ce1a3d30a",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement Direction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c3ae19e2-1d19-4285-ad55-22e59cec5af6",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement Direction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
