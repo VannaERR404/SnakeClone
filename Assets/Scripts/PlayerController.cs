@@ -22,11 +22,11 @@ public class PlayerController : MonoBehaviour
         Vector3.right
     };
     private Vector3 lastSectionPos;
-    public List<GameObject> snakeSections = new();
+    private List<GameObject> snakeSections = new();
     public GameObject sectionPrefab;
     public FoodSpawner foodSpawner;
     private void Awake() {
-        InvokeRepeating("Movement",1,0.25f);
+        InvokeRepeating("Movement",1,0.06f);
         snakeSections.Add(this.gameObject);
         foodSpawner = FindObjectOfType<FoodSpawner>();
         lastSectionPos = this.transform.position;
