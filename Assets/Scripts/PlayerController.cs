@@ -2,21 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
+public enum Directions : int {
+    up = 0,
+    left = 1,
+    down = 2,
+    right = 3
+}
+public static class DirectionsExtensions {
+    public static bool CheckOpposite(this Directions direction1, Directions direction2) => Mathf.Abs(direction1-direction2) == 2;
+}
 public class PlayerController : MonoBehaviour
 {
-    private int currentDirection = 0;
-    private int queuedDirection = 0;
-    private Vector3[] directions = new Vector3[4];
+    private Directions currentDirection;
+    private Directions queuedDirection;
+    public static readonly Vector3[] directions = new Vector3[4] {
+        Vector3.up,
+        Vector3.left,
+        Vector3.down,
+        Vector3.right
+    };
     private Vector3 lastSectionPos;
     public List<GameObject> snakeSections = new();
     public GameObject sectionPrefab;
     public FoodSpawner foodSpawner;
     private void Awake() {
         InvokeRepeating("Movement",1,0.25f);
-        directions[0] = Vector3.up;
-        directions[1] = Vector3.left;
-        directions[2] = Vector3.down;
-        directions[3] = Vector3.right;
         snakeSections.Add(this.gameObject);
         foodSpawner = FindObjectOfType<FoodSpawner>();
         lastSectionPos = this.transform.position;
@@ -24,24 +34,13 @@ public class PlayerController : MonoBehaviour
     }
     public void MovementInput (CallbackContext context) {
         if(context.started) {
-            switch (context.control.path)
-                {
-                    case "/Keyboard/w":
-                        queuedDirection = 0;
-                        break;
-                    case "/Keyboard/a":
-                        queuedDirection = 1;
-                        break;
-                    case "/Keyboard/s":
-                        queuedDirection = 2;
-                        break;
-                    case "/Keyboard/d":
-                        queuedDirection = 3;
-                        break;
-                    default:
-                        Debug.LogError("Unexpected input case");
-                        break;
-                }
+            queuedDirection = context.control.path switch {
+                "/Keyboard/w" => Directions.up,
+                "/Keyboard/a" => Directions.left,
+                "/Keyboard/s" => Directions.down,
+                "/Keyboard/d" => Directions.right,
+                _ => throw new System.ArgumentException()
+            };
         }
     }
     private void Movement() {
@@ -53,7 +52,7 @@ public class PlayerController : MonoBehaviour
             if(i != 0)
                 section.transform.position = snakeSections[i-1].transform.position;
             else
-                transform.position += directions[currentDirection];
+                transform.position += directions[(int)currentDirection];
             if(transform.position == snakeSections[i].transform.position && i != 0 && i != 1)
                 Debug.Log("Game Over! Ran into self!");
             foodSpawner.validCoords.Remove(new Vector2((int)snakeSections[i].transform.position.x,(int)snakeSections[i].transform.position.y));
@@ -70,7 +69,7 @@ public class PlayerController : MonoBehaviour
         
     }
     private void getQueuedDirection() {
-        if (currentDirection == 0 && queuedDirection == 2 || currentDirection == 1 && queuedDirection == 3 || currentDirection == 2 && queuedDirection == 0 || currentDirection == 3 && queuedDirection == 1)
+        if (currentDirection.CheckOpposite(queuedDirection))
             return;
         currentDirection = queuedDirection;
         

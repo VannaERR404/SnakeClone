@@ -42,7 +42,7 @@ public class FoodSpawner : MonoBehaviour
     private List<Vector2> addYCoords(int xIndex) {
         List<Vector2> listToReturn = new();
         for (int i = 0; i < maxGameAreaY; i++)
-            listToReturn.Add(new Vector2(((-maxGameAreaX-1)/2)+xIndex,((maxGameAreaX+1)/2)-i));
+            listToReturn.Add(new Vector2(((-maxGameAreaX+1)/2)+xIndex,((maxGameAreaX-1)/2)-i));
         return listToReturn;
     }
 }
