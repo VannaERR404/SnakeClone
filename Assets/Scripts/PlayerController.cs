@@ -5,6 +5,7 @@ using static UnityEngine.InputSystem.InputAction;
 public class PlayerController : MonoBehaviour
 {
     private int currentDirection = 0;
+    private int queuedDirection = 0;
     private Vector3[] directions = new Vector3[4];
     private Vector3 lastSectionPos;
     public List<GameObject> snakeSections = new();
@@ -18,30 +19,24 @@ public class PlayerController : MonoBehaviour
         directions[3] = Vector3.right;
         snakeSections.Add(this.gameObject);
         foodSpawner = FindObjectOfType<FoodSpawner>();
+        lastSectionPos = this.transform.position;
+        CreateNewSection();
     }
     public void MovementInput (CallbackContext context) {
         if(context.started) {
             switch (context.control.path)
                 {
                     case "/Keyboard/w":
-                        if(currentDirection == 2 && snakeSections.Count != 1)
-                            break;
-                        currentDirection = 0;
+                        queuedDirection = 0;
                         break;
                     case "/Keyboard/a":
-                        if(currentDirection == 3 && snakeSections.Count != 1)
-                            break;
-                        currentDirection = 1;
+                        queuedDirection = 1;
                         break;
                     case "/Keyboard/s":
-                        if(currentDirection == 0 && snakeSections.Count != 1)
-                            break;
-                        currentDirection = 2;
+                        queuedDirection = 2;
                         break;
                     case "/Keyboard/d":
-                        if(currentDirection == 1 && snakeSections.Count != 1)
-                            break;
-                        currentDirection = 3;
+                        queuedDirection = 3;
                         break;
                     default:
                         Debug.LogError("Unexpected input case");
@@ -50,6 +45,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     private void Movement() {
+        getQueuedDirection();
         for (int i = snakeSections.Count-1; i >= 0; i--) {
             GameObject section = snakeSections[i];
             if(i == snakeSections.Count-1)
@@ -71,6 +67,13 @@ public class PlayerController : MonoBehaviour
             foodSpawner.SpawnFood();
             CreateNewSection();
         }
+        
+    }
+    private void getQueuedDirection() {
+        if (currentDirection == 0 && queuedDirection == 2 || currentDirection == 1 && queuedDirection == 3 || currentDirection == 2 && queuedDirection == 0 || currentDirection == 3 && queuedDirection == 1)
+            return;
+        currentDirection = queuedDirection;
+        
         
     }
     private void CreateNewSection() {
