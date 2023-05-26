@@ -60,21 +60,9 @@ public class PlayerController : MonoBehaviour
                 foodSpawner.validCoords.Add(lastSectionPos);
             }
         }
-
-        if(transform.position == foodSpawner.foodLocation) {
-            Destroy(foodSpawner.food);
-            foodSpawner.SpawnFood();
-            CreateNewSection();
-        }
-
-        if(Mathf.Abs(transform.position.x) >= (gameManager.maxGameAreaX/2+1))
-            transform.position = new Vector3(Mathf.Clamp((transform.position.x*-1),((gameManager.maxGameAreaX-1)/2)*-1,(gameManager.maxGameAreaX-1)/2),transform.position.y);
-        if(Mathf.Abs(transform.position.y) >= (gameManager.maxGameAreaY/2+1))
-            transform.position = new Vector3(transform.position.x, Mathf.Clamp((transform.position.y*-1),((gameManager.maxGameAreaY-1)/2)*-1,(gameManager.maxGameAreaY-1)/2));
-
-
-        if(snakeSections.Skip(1).Any(section => section.transform.position == transform.position))
-            Debug.Log("Game Over! Ran into self!");
+        CheckForFood();
+        ScreenWrap();
+        CheckCollision();
     }
     private void getQueuedDirection() {
         if (currentDirection.CheckOpposite(queuedDirection))
@@ -84,5 +72,22 @@ public class PlayerController : MonoBehaviour
     private void CreateNewSection() {
         GameObject newSection = Instantiate(sectionPrefab, lastSectionPos, Quaternion.identity);
         snakeSections.Add(newSection);
+    }
+    private void CheckForFood() {
+        if(transform.position == foodSpawner.foodLocation) {
+            Destroy(foodSpawner.food);
+            foodSpawner.SpawnFood();
+            CreateNewSection();
+        }
+    }
+    private void ScreenWrap() {
+        if(Mathf.Abs(transform.position.x) >= (gameManager.maxGameAreaX/2+1))
+            transform.position = new Vector3(Mathf.Clamp((transform.position.x*-1),((gameManager.maxGameAreaX-1)/2)*-1,(gameManager.maxGameAreaX-1)/2),transform.position.y);
+        if(Mathf.Abs(transform.position.y) >= (gameManager.maxGameAreaY/2+1))
+            transform.position = new Vector3(transform.position.x, Mathf.Clamp((transform.position.y*-1),((gameManager.maxGameAreaY-1)/2)*-1,(gameManager.maxGameAreaY-1)/2));
+    }
+    private void CheckCollision() {
+        if(snakeSections.Skip(1).Any(section => section.transform.position == transform.position))
+            Debug.Log("Game Over! Ran into self!");
     }
 }
