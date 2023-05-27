@@ -3,26 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
-public enum Directions : int {
-    up = 0,
-    left = 1,
-    down = 2,
-    right = 3
-}
-public static class DirectionsExtensions {
-    public static bool CheckOpposite(this Directions direction1, Directions direction2) => Mathf.Abs(direction1-direction2) == 2;
-}
 public class PlayerController : MonoBehaviour
 {
-    private Directions currentDirection;
-    private Directions queuedDirection;
-    public static readonly Vector3[] directions = new Vector3[4] {
-        Vector3.up,
-        Vector3.left,
-        Vector3.down,
-        Vector3.right
-    };
-    private Vector3 lastSectionPos;
+    private Vector2 currentDirection;
+    private Vector2 queuedDirection;
+    private Vector2 lastSectionPos;
     private List<GameObject> snakeSections = new();
     public GameObject sectionPrefab;
     public FoodSpawner foodSpawner;
@@ -32,18 +17,16 @@ public class PlayerController : MonoBehaviour
         snakeSections.Add(this.gameObject);
         foodSpawner = FindObjectOfType<FoodSpawner>();
         lastSectionPos = this.transform.position;
+        queuedDirection = new(0,1);
         CreateNewSection();
     }
-    public void MovementInput (CallbackContext context) {
-        if(context.started) {
-            queuedDirection = context.control.path switch {
-                "/Keyboard/w" => Directions.up,
-                "/Keyboard/a" => Directions.left,
-                "/Keyboard/s" => Directions.down,
-                "/Keyboard/d" => Directions.right,
-                _ => throw new System.ArgumentException()
-            };
-        }
+    public void HorizontalInput(CallbackContext context) {
+        if(context.performed) 
+            queuedDirection = new(context.ReadValue<float>(),0);
+    }
+    public void VerticalInput(CallbackContext context) {
+        if(context.performed) 
+            queuedDirection = new(0,context.ReadValue<float>());
     }
     private void Movement() {
         getQueuedDirection();
@@ -54,7 +37,7 @@ public class PlayerController : MonoBehaviour
             if(i != 0)
                 section.transform.position = snakeSections[i-1].transform.position;
             else
-                transform.position += directions[(int)currentDirection];
+                transform.position += (Vector3)currentDirection;
             foodSpawner.validCoords.Remove(new Vector2((int)section.transform.position.x,(int)section.transform.position.y));
             if(!foodSpawner.validCoords.Contains(lastSectionPos)) {
                 foodSpawner.validCoords.Add(lastSectionPos);
@@ -65,9 +48,8 @@ public class PlayerController : MonoBehaviour
         CheckCollision();
     }
     private void getQueuedDirection() {
-        if (currentDirection.CheckOpposite(queuedDirection))
-            return;
-        currentDirection = queuedDirection;
+        if ((transform.position + (Vector3)queuedDirection) != snakeSections[1].transform.position)
+            currentDirection = queuedDirection;
     }
     private void CreateNewSection() {
         GameObject newSection = Instantiate(sectionPrefab, lastSectionPos, Quaternion.identity);
@@ -86,6 +68,7 @@ public class PlayerController : MonoBehaviour
         if(Mathf.Abs(transform.position.y) >= (gameManager.maxGameAreaY/2+1))
             transform.position = new Vector3(transform.position.x, Mathf.Clamp((transform.position.y*-1),((gameManager.maxGameAreaY-1)/2)*-1,(gameManager.maxGameAreaY-1)/2));
     }
+    
     private void CheckCollision() {
         if(snakeSections.Skip(1).Any(section => section.transform.position == transform.position))
             Debug.Log("Game Over! Ran into self!");
