@@ -12,4 +12,7 @@ public class GameManager : MonoBehaviour
             return;
         }
     }
+    public void GameOver() {
+        Debug.Log("Game Over! Ran into self!");
+    }
 }
