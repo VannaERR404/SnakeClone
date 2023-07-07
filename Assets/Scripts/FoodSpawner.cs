@@ -21,7 +21,7 @@ public class FoodSpawner : MonoBehaviour
         for(int i  = 0; i < gameManager.maxGameAreaX*gameManager.maxGameAreaY; i++) {
             int x = i/gameManager.maxGameAreaY;
             int y = i % gameManager.maxGameAreaY;
-            validCoords.Add(new Vector2(((-gameManager.maxGameAreaX+1)/2)+x,((gameManager.maxGameAreaX-1)/2)-y));
+            validCoords.Add(new Vector2(((-gameManager.maxGameAreaX+1)/2)+x,((gameManager.maxGameAreaY-1)/2)-y));
         }
     }
 }

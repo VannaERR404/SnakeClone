@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
+using Clock;
 public class PlayerController : MonoBehaviour
 {
     private Vector2 currentDirection;
@@ -13,16 +14,20 @@ public class PlayerController : MonoBehaviour
     private List<GameObject> snakeSections = new();
     public FoodSpawner foodSpawner;
     public GameManager gameManager;
+    public float tickRate = 0.4f;
+    private Clock.Clock clock = new(0.4f);
 
     private void Awake() {
-        InvokeRepeating("Movement",1,0.5f);
-        newSectionPos = transform.position;
+        newSectionPos = transform.position - new Vector3(0,1);
         snakeSections.Add(this.gameObject);
         foodSpawner = FindObjectOfType<FoodSpawner>();
         queuedDirection = new(0,1);
         lastSection = snakeSections.Last();
         CreateNewSection();
+        clock.onTrigger = Movement;
     }
+
+    private void Update() => clock.Update(Time.deltaTime);
 
     public void HorizontalInput(CallbackContext context) {
         if(context.performed) 
@@ -43,18 +48,19 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private Vector3 getQueuedDirection() => transform.position + (Vector3)queuedDirection != snakeSections[1].transform.position ? currentDirection = queuedDirection : currentDirection;
+    private Vector3 getQueuedDirection() => queuedDirection + currentDirection != Vector2.zero ? currentDirection = queuedDirection : currentDirection;
 
     private void CreateNewSection() {
         snakeSections.Add(Instantiate(sectionPrefab, newSectionPos, Quaternion.identity));
-        UpdateValidCoords(null, newSectionPos);
+        UpdateValidCoords(newSectionPos);
     }
 
     private void CheckForFood() {
         if(transform.position == foodSpawner.foodLocation) {
             Destroy(foodSpawner.food);
-            foodSpawner.SpawnFood();
             CreateNewSection();
+            foodSpawner.SpawnFood();
+            clock.interval = Mathf.Clamp(clock.interval - 0.05f,0.1f,1f);
         }
     }
 
@@ -73,16 +79,16 @@ public class PlayerController : MonoBehaviour
         lastSection.transform.position = transform.position;
         transform.position += dir;
         ScreenWrap();
-        UpdateValidCoords(transform.position, lastSection.transform.position);
+        UpdateValidCoords(transform.position, newSectionPos);
         snakeSections.RemoveAt(snakeSections.Count()-1);
         snakeSections.Insert(1, lastSection);
         lastSection = snakeSections.Last();
     }
 
     private void UpdateValidCoords(Vector3? coordToRemove = null, Vector3? coordToAdd = null) {
-        if(coordToAdd != null)
+        if(coordToAdd != null) 
             foodSpawner.validCoords.Add((Vector2)coordToAdd);
-        if(coordToRemove != null)
+        if(coordToRemove != null) 
             foodSpawner.validCoords.Remove((Vector2)coordToRemove);
     }
 }
