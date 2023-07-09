@@ -4,8 +4,7 @@ using System.Linq;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
 using Clock;
-public class PlayerController : MonoBehaviour
-{
+public class PlayerController : MonoBehaviour {
     private Vector2 currentDirection;
     private Vector2 queuedDirection;
     private Vector2 newSectionPos;
@@ -14,8 +13,7 @@ public class PlayerController : MonoBehaviour
     private List<GameObject> snakeSections = new();
     public FoodSpawner foodSpawner;
     public GameManager gameManager;
-    public float tickRate = 0.4f;
-    private Clock.Clock clock = new(0.4f);
+    private Clock.Clock clock = new(0.1f);
 
     private void Awake() {
         newSectionPos = transform.position - new Vector3(0,1);
@@ -40,11 +38,15 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Movement() {
+        var dir = getQueuedDirection();
+        if(gameManager.gameOver) return;
         lastSection = snakeSections.Last();
-        Move();
-        CheckForFood();
-        if(CheckCollision())
+        if(CheckCollision(dir)) {
             gameManager.GameOver();
+            return;
+        }
+        Move(dir);
+        CheckForFood();
     }
 
 
@@ -56,26 +58,24 @@ public class PlayerController : MonoBehaviour
     }
 
     private void CheckForFood() {
-        if(transform.position == foodSpawner.foodLocation) {
-            Destroy(foodSpawner.food);
-            CreateNewSection();
-            foodSpawner.SpawnFood();
-            clock.interval = Mathf.Clamp(clock.interval - 0.05f,0.1f,1f);
-        }
+        if(transform.position != foodSpawner.foodLocation) return;
+        Destroy(foodSpawner.food);
+        CreateNewSection();
+        foodSpawner.SpawnFood();
+        clock.interval = Mathf.Clamp(clock.interval - 0.05f,0.1f,1f);
     }
 
     private void ScreenWrap() {
         if(Mathf.Abs(transform.position.x) >= ((gameManager.maxGameAreaX+1)/2))
             transform.position = new Vector3(Mathf.Clamp((transform.position.x*-1),((gameManager.maxGameAreaX-1)/2)*-1,(gameManager.maxGameAreaX-1)/2),transform.position.y);
-        if(Mathf.Abs(transform.position.y) >= ((gameManager.maxGameAreaY+1)/2))
+        else if(Mathf.Abs(transform.position.y) >= ((gameManager.maxGameAreaY+1)/2))
             transform.position = new Vector3(transform.position.x, Mathf.Clamp((transform.position.y*-1),((gameManager.maxGameAreaY-1)/2)*-1,(gameManager.maxGameAreaY-1)/2));
     }
 
-    private bool CheckCollision() => snakeSections.Skip(1).Any(section => section.transform.position == transform.position);
+    private bool CheckCollision(Vector3 dir) => snakeSections.Skip(1).Any(section => section.transform.position == transform.position + dir);
 
-    private void Move() {
+    private void Move(Vector3 dir) {
         newSectionPos = lastSection.transform.position;
-        var dir = getQueuedDirection();
         lastSection.transform.position = transform.position;
         transform.position += dir;
         ScreenWrap();

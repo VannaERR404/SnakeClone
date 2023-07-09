@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class FoodSpawner : MonoBehaviour
-{
+public class FoodSpawner : MonoBehaviour {
     public GameManager gameManager;
     public GameObject foodPrefab;
     public Vector3 foodLocation;
